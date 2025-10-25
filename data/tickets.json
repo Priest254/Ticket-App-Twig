@@ -1,0 +1,10 @@
+﻿[
+    {
+        "id": "test123",
+        "title": "Test Ticket",
+        "description": "This is a test ticket to verify the system is working",
+        "status": "open",
+        "created_at": "2025-01-25 10:00:00",
+        "updated_at": "2025-01-25 10:00:00"
+    }
+]
