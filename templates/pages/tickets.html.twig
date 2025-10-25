@@ -1,0 +1,283 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tickets - TicketApp{% endblock %}
+
+{% block content %}
+<div class="flex flex-col min-h-screen bg-gradient-to-b from-indigo-700 via-purple-700 to-indigo-900 text-white overflow-hidden">
+    <div class="absolute inset-0 -z-10">
+        <div class="absolute top-0 left-0 w-96 h-96 bg-indigo-500 rounded-full blur-3xl opacity-30"></div>
+        <div class="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-purple-500 rounded-full blur-3xl opacity-30"></div>
+    </div>
+
+    <main class="flex-grow py-16 px-6 max-w-[1440px] mx-auto">
+        <h1 class="text-4xl font-bold text-center mb-12 animate-fade-in">
+            Ticket Management
+        </h1>
+
+        <div class="grid lg:grid-cols-2 gap-10">
+            <!-- Form -->
+            <section class="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl animate-slide-in-left">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span id="form-title">Create Ticket</span>
+                </h2>
+                
+                <form id="ticket-form" class="space-y-5">
+                    <div>
+                        <label class="block text-sm mb-1">Title *</label>
+                        <input type="text" 
+                               id="ticket-title"
+                               class="w-full p-3 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                               placeholder="Enter title"
+                               required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1">Description</label>
+                        <textarea id="ticket-description"
+                                  class="w-full p-3 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                  rows="3"
+                                  placeholder="Enter description"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1">Status *</label>
+                        <select id="ticket-status"
+                                class="w-full p-3 rounded-xl text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                required>
+                            <option value="open">Open</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="submit" 
+                                class="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700 transition">
+                            <span id="submit-text">Add Ticket</span>
+                        </button>
+                        <button type="button" 
+                                id="cancel-btn"
+                                onclick="cancelEdit()"
+                                class="bg-gray-500 text-white px-6 py-2 rounded-xl hover:bg-gray-600 transition hidden">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- List -->
+            <section class="animate-slide-in-right">
+                <div id="tickets-container" class="grid sm:grid-cols-2 gap-6">
+                    <!-- Tickets will be rendered here by JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<style>
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+}
+</style>
+
+<script>
+// localStorage key for tickets
+const TICKETS_KEY = 'ticketapp_twig_tickets';
+
+// Load tickets from localStorage
+function loadTickets() {
+    const stored = localStorage.getItem(TICKETS_KEY);
+    return stored ? JSON.parse(stored) : [];
+}
+
+// Save tickets to localStorage
+function saveTickets(tickets) {
+    localStorage.setItem(TICKETS_KEY, JSON.stringify(tickets));
+}
+
+// Get tickets and render them
+let tickets = loadTickets();
+let editId = null;
+
+// Render tickets
+function renderTickets() {
+    const ticketsContainer = document.querySelector('#tickets-container');
+    if (!ticketsContainer) return;
+
+    if (tickets.length === 0) {
+        ticketsContainer.innerHTML = `
+            <div class="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl p-10 text-center">
+                <p class="text-white/70">No tickets yet. Create one!</p>
+            </div>
+        `;
+        return;
+    }
+
+    ticketsContainer.innerHTML = tickets.map(ticket => `
+        <div class="bg-white/10 border border-white/10 rounded-2xl p-6 shadow-md hover:bg-white/20 transition backdrop-blur-xl">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="font-semibold text-lg">${ticket.title}</h3>
+                <span class="px-3 py-1 text-xs border rounded-full ${getBadgeClass(ticket.status)}">
+                    ${ticket.status.replace('_', ' ')}
+                </span>
+            </div>
+            ${ticket.description ? `<p class="text-sm text-white/80 mb-3">${ticket.description}</p>` : ''}
+            <div class="flex justify-between text-sm text-white/60">
+                <span>${ticket.createdAt}</span>
+                <div class="flex gap-3">
+                    <button onclick="editTicket('${ticket.id}')" class="hover:text-blue-300 transition">
+                        ✏️
+                    </button>
+                    <button onclick="deleteTicket('${ticket.id}')" class="hover:text-red-400 transition">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Get badge class for status
+function getBadgeClass(status) {
+    switch (status) {
+        case 'open':
+            return 'bg-green-400/20 text-green-300 border-green-300/30';
+        case 'in_progress':
+            return 'bg-amber-400/20 text-amber-300 border-amber-300/30';
+        case 'closed':
+            return 'bg-gray-400/20 text-gray-300 border-gray-300/30';
+        default:
+            return 'bg-gray-400/20 text-gray-300 border-gray-300/30';
+    }
+}
+
+// Handle form submission
+document.getElementById('ticket-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const title = document.getElementById('ticket-title').value;
+    const description = document.getElementById('ticket-description').value;
+    const status = document.getElementById('ticket-status').value;
+    
+    if (!title.trim()) {
+        alert('Title is required');
+        return;
+    }
+    
+    if (editId) {
+        // Update existing ticket
+        const ticketIndex = tickets.findIndex(t => t.id === editId);
+        if (ticketIndex !== -1) {
+            tickets[ticketIndex] = {
+                ...tickets[ticketIndex],
+                title: title,
+                description: description,
+                status: status
+            };
+        }
+        editId = null;
+    } else {
+        // Create new ticket
+        const newTicket = {
+            id: Date.now().toString(),
+            title: title,
+            description: description,
+            status: status,
+            createdAt: new Date().toLocaleString()
+        };
+        tickets.push(newTicket);
+    }
+    
+    saveTickets(tickets);
+    renderTickets();
+    resetForm();
+});
+
+// Edit ticket
+function editTicket(ticketId) {
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (ticket) {
+        document.getElementById('ticket-title').value = ticket.title;
+        document.getElementById('ticket-description').value = ticket.description || '';
+        document.getElementById('ticket-status').value = ticket.status;
+        editId = ticketId;
+        document.getElementById('form-title').textContent = 'Edit Ticket';
+        document.getElementById('submit-text').textContent = 'Update Ticket';
+        document.getElementById('cancel-btn').classList.remove('hidden');
+    }
+}
+
+// Delete ticket
+function deleteTicket(ticketId) {
+    if (confirm('Are you sure you want to delete this ticket?')) {
+        tickets = tickets.filter(t => t.id !== ticketId);
+        saveTickets(tickets);
+        renderTickets();
+    }
+}
+
+// Cancel edit
+function cancelEdit() {
+    resetForm();
+}
+
+// Reset form
+function resetForm() {
+    document.getElementById('ticket-form').reset();
+    editId = null;
+    document.getElementById('form-title').textContent = 'Create Ticket';
+    document.getElementById('submit-text').textContent = 'Add Ticket';
+    document.getElementById('cancel-btn').classList.add('hidden');
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    renderTickets();
+});
+</script>
+{% endblock %}

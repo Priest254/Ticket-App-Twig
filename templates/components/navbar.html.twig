@@ -1,0 +1,82 @@
+<nav class="relative z-50 bg-gradient-to-r from-indigo-700 to-purple-700 text-white shadow-lg">
+    <div class="max-w-[1440px] mx-auto flex items-center justify-between px-4 py-4">
+        <a href="{% if user %}/dashboard{% else %}/auth/signup{% endif %}" 
+           class="text-2xl font-extrabold tracking-wide focus:outline-none focus:ring-2 focus:ring-white">
+            TicketApp
+        </a>
+
+        <!-- Desktop menu -->
+        <div class="hidden md:flex gap-6 items-center">
+            {% if user %}
+                <a href="/dashboard" class="hover:text-blue-200 focus:ring-2 focus:ring-white rounded px-2">
+                    Dashboard
+                </a>
+                <a href="/tickets" class="hover:text-blue-200 focus:ring-2 focus:ring-white rounded px-2">
+                    Tickets
+                </a>
+                <a href="/logout" class="bg-white/20 hover:bg-white/30 px-4 py-1 rounded-lg transition focus:ring-2 focus:ring-white">
+                    Logout
+                </a>
+            {% else %}
+                <a href="/auth/login" class="hover:text-blue-200 focus:ring-2 focus:ring-white rounded px-2">
+                    Login
+                </a>
+                <a href="/auth/signup" class="hover:text-blue-200 focus:ring-2 focus:ring-white rounded px-2">
+                    Get Started
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Mobile menu button -->
+        <button onclick="toggleMobileMenu()" 
+                class="md:hidden focus:ring-2 focus:ring-white rounded"
+                aria-label="Toggle menu">
+            <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+            <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile dropdown -->
+    <div id="mobile-menu" class="md:hidden hidden flex flex-col bg-indigo-800/90 backdrop-blur-sm text-white px-4 pb-4">
+        {% if user %}
+            <a href="/dashboard" class="py-2 hover:text-blue-200 focus:ring-2 focus:ring-white rounded">
+                Dashboard
+            </a>
+            <a href="/tickets" class="py-2 hover:text-blue-200 focus:ring-2 focus:ring-white rounded">
+                Tickets
+            </a>
+            <a href="/logout" class="py-2 text-left hover:text-blue-200 focus:ring-2 focus:ring-white rounded">
+                Logout
+            </a>
+        {% else %}
+            <a href="/auth/login" class="py-2 hover:text-blue-200 focus:ring-2 focus:ring-white rounded">
+                Login
+            </a>
+            <a href="/auth/signup" class="py-2 hover:text-blue-200 focus:ring-2 focus:ring-white rounded">
+                Get Started
+            </a>
+        {% endif %}
+    </div>
+</nav>
+
+<script>
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    if (mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+    } else {
+        mobileMenu.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+    }
+}
+</script>
