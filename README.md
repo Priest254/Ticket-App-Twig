@@ -36,13 +36,15 @@ ticketapp-twig/
 
 ## Installation
 
+### Local Development
+
 1. **Install PHP dependencies:**
    ```bash
    composer install
    ```
 
 2. **Set up web server:**
-   - Ensure your web server supports PHP
+   - Ensure your web server supports PHP 7.3+
    - Point document root to the project directory
    - Enable URL rewriting (mod_rewrite for Apache)
 
@@ -51,6 +53,28 @@ ticketapp-twig/
    chmod 755 data/
    chmod 644 data/*.json
    ```
+
+### Deployment to Render
+
+1. **Update dependencies for PHP 7.3 compatibility:**
+   ```bash
+   # On Windows
+   update-dependencies.bat
+   
+   # On Linux/Mac
+   chmod +x update-dependencies.sh
+   ./update-dependencies.sh
+   ```
+
+2. **Deploy to Render:**
+   - Connect your GitHub repository to Render
+   - Set build command: `composer install --no-dev --optimize-autoloader`
+   - Set start command: `php -S 0.0.0.0:$PORT index.php`
+   - The application will automatically work with PHP 7.3+
+
+### PHP Version Compatibility
+
+This application is configured to work with PHP 7.3+ for maximum compatibility with hosting providers like Render. The `composer.json` includes platform configuration to ensure dependencies are compatible with PHP 7.3.33.
 
 ## Usage
 

@@ -1,5 +1,10 @@
 {
     "require": {
-        "twig/twig": "^3.21"
+        "twig/twig": "^2.15"
+    },
+    "config": {
+        "platform": {
+            "php": "7.3.33"
+        }
     }
 }
